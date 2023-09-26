@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-platformio:
+    runs-on: ubuntu-latest
+    name: Build Marlin
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-platformio-${{ hashFiles('Marlin/config.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-platformio-
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install PlatformIO
+        run: |
+          pip install --upgrade pip
+          pip install platformio
+      - name: Run PlatformIO
+        run: python -m platformio run
