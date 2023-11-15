@@ -31,5 +31,5 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install platformio
-      - name: Run PlatformIO
+      - name: Build Marlin with PlatformIO
         run: python -m platformio run
