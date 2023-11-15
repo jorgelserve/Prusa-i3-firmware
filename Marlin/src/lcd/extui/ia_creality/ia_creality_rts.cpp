@@ -688,9 +688,7 @@ void RTS::handleData() {
     return;
   }
 
-  #if ENABLED(LCD_BED_TRAMMING)
-    constexpr float lfrb[4] = BED_TRAMMING_INSET_LFRB;
-  #endif
+  constexpr float lfrb[4] = BED_TRAMMING_INSET_LFRB;
 
   switch (Checkkey) {
     case Printfile:
@@ -807,10 +805,8 @@ void RTS::handleData() {
           onStatusChanged(F("Requested Offset Beyond Limits"));
         }
 
-        sendData(getZOffset_mm() * 100, ProbeOffset_Z);
-        break;
-
-    #endif // HAS_BED_PROBE
+      sendData(getZOffset_mm() * 100, ProbeOffset_Z);
+      break;
 
     case TempControl:
       if (recdat.data[0] == 0) {
@@ -1148,7 +1144,7 @@ void RTS::handleData() {
           #if ENABLED(MESH_BED_LEVELING)
             sendData(ExchangePageBase + 93, ExchangepageAddr);
           #else
-            waitway = 3; // Only for prohibiting to receive message
+            waitway = 3; // only for prohibiting to receive massage
             sendData(3, AutolevelIcon);
             uint8_t abl_probe_index = 0;
             while (abl_probe_index < 25) {
@@ -1161,74 +1157,65 @@ void RTS::handleData() {
           break;
         }
 
-        #if ENABLED(LCD_BED_TRAMMING)
-          case 6: { // Bed Tramming,  Centre 1
-            setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
-            setAxisPosition_mm(X_CENTER, axis_t(X));
-            setAxisPosition_mm(Y_CENTER, axis_t(Y));
-            waitway = 6;
-            break;
-          }
-          case 7: { // Bed Tramming, Front Left 2
-            setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
-            setAxisPosition_mm(X_MIN_BED + lfrb[0], axis_t(X));
-            setAxisPosition_mm(Y_MIN_BED + lfrb[1], axis_t(Y));
-            waitway = 6;
-            break;
-          }
-          case 8: { // Bed Tramming, Front Right 3
-            setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
-            setAxisPosition_mm(X_MAX_BED - lfrb[2], axis_t(X));
-            setAxisPosition_mm(Y_MIN_BED + lfrb[1], axis_t(Y));
-            waitway = 6;
-            break;
-          }
-          case 9: { // Bed Tramming, Back Right 4
-            setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
-            setAxisPosition_mm(X_MAX_BED - lfrb[2], axis_t(X));
-            setAxisPosition_mm(Y_MAX_BED - lfrb[3], axis_t(Y));
-            waitway = 6;
-            break;
-          }
-          case 10: { // Bed Tramming, Back Left 5
-            setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
-            setAxisPosition_mm(X_MIN_BED + lfrb[0], axis_t(X));
-            setAxisPosition_mm(Y_MAX_BED - lfrb[3], axis_t(Y));
-            waitway = 6;
-            break;
-          }
-        #endif // LCD_BED_TRAMMING
-
+        case 6: { // Assitant Level ,  Centre 1
+          setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
+          setAxisPosition_mm(X_CENTER, axis_t(X));
+          setAxisPosition_mm(Y_CENTER, axis_t(Y));
+          waitway = 6;
+          break;
+        }
+        case 7: { // Assitant Level , Front Left 2
+          setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
+          setAxisPosition_mm(X_MIN_BED + lfrb[0], axis_t(X));
+          setAxisPosition_mm(Y_MIN_BED + lfrb[1], axis_t(Y));
+          waitway = 6;
+          break;
+        }
+        case 8: { // Assitant Level , Front Right 3
+          setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
+          setAxisPosition_mm(X_MAX_BED - lfrb[2], axis_t(X));
+          setAxisPosition_mm(Y_MIN_BED + lfrb[1], axis_t(Y));
+          waitway = 6;
+          break;
+        }
+        case 9: { // Assitant Level , Back Right 4
+          setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
+          setAxisPosition_mm(X_MAX_BED - lfrb[2], axis_t(X));
+          setAxisPosition_mm(Y_MAX_BED - lfrb[3], axis_t(Y));
+          waitway = 6;
+          break;
+        }
+        case 10: { // Assitant Level , Back Left 5
+          setAxisPosition_mm(BED_TRAMMING_Z_HOP, axis_t(Z));
+          setAxisPosition_mm(X_MIN_BED + lfrb[0], axis_t(X));
+          setAxisPosition_mm(Y_MAX_BED - lfrb[3], axis_t(Y));
+          waitway = 6;
+          break;
+        }
         case 11: { // Autolevel switch
           #if HAS_MESH
             const bool gla = !getLevelingActive();
             setLevelingActive(gla);
             sendData(gla ? 3 : 2, AutoLevelIcon);
           #endif
-          #if HAS_BED_PROBE
-            sendData(getZOffset_mm() * 100, ProbeOffset_Z);
-          #endif
+          sendData(getZOffset_mm() * 100, ProbeOffset_Z);
           break;
         }
-        #if ENABLED(G26_MESH_VALIDATION)
-          case 12: {
-            injectCommands(F("G26R255"));
-            onStatusChanged(F("Beginning G26.. Heating"));
-            break;
-          }
-        #endif
-        #if ENABLED(MESH_BED_LEVELING)
-          case 13: {
-            injectCommands(F("G29S1"));
-            onStatusChanged(F("Begin Manual Mesh"));
-            break;
-          }
-          case 14: {
-            injectCommands(F("G29S2"));
-            onStatusChanged(F("Moving to Next Mesh Point"));
-            break;
-          }
-        #endif
+        case 12: {
+          injectCommands(F("G26R255"));
+          onStatusChanged(F("Beginning G26.. Heating"));
+          break;
+        }
+        case 13: {
+          injectCommands(F("G29S1"));
+          onStatusChanged(F("Begin Manual Mesh"));
+          break;
+        }
+        case 14: {
+          injectCommands(F("G29S2"));
+          onStatusChanged(F("Moving to Next Mesh Point"));
+          break;
+        }
         case 15: {
           injectCommands(F("M211S0\nG91\nG1Z-0.025\nG90\nM211S1"));
           onStatusChanged(F("Moved down 0.025"));
@@ -1439,14 +1426,13 @@ void RTS::handleData() {
           break;
         }
 
-        #if ENABLED(PIDTEMPBED)
-          case 5: {
+        case 5: {
+          #if ENABLED(PIDTEMPBED)
             onStatusChanged(F("Bed PID Started"));
             startBedPIDTune(static_cast<celsius_t>(pid_bedAutoTemp));
-            break;
-          }
-        #endif
-
+          #endif
+          break;
+        }
         case 6: {
           injectCommands(F("M500"));
           break;

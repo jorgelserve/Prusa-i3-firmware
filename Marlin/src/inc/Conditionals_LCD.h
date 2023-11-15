@@ -35,8 +35,8 @@
   #define MKS_MINI_12864
 #endif
 
-// MKS_MINI_12864_V3 and BTT_MINI_12864 have identical pinouts to FYSETC_MINI_12864_2_1
-#if ANY(MKS_MINI_12864_V3, BTT_MINI_12864)
+// MKS_MINI_12864_V3 and BTT_MINI_12864_V1 are identical to FYSETC_MINI_12864_2_1
+#if ANY(MKS_MINI_12864_V3, BTT_MINI_12864_V1)
   #define FYSETC_MINI_12864_2_1
 #endif
 
@@ -490,7 +490,7 @@
 
 // Extensible UI serial touch screens. (See src/lcd/extui)
 #if ANY(HAS_DGUS_LCD, MALYAN_LCD, ANYCUBIC_LCD_I3MEGA, ANYCUBIC_LCD_CHIRON, NEXTION_TFT, TOUCH_UI_FTDI_EVE)
-  #define IS_EXTUI 1 // Just for sanity check.
+  #define IS_EXTUI 1
   #define EXTENSIBLE_UI
 #endif
 
@@ -1439,14 +1439,8 @@
   #if ANY(Z_PROBE_ALLEN_KEY, MAG_MOUNTED_PROBE)
     #define PROBE_TRIGGERED_WHEN_STOWED_TEST 1 // Extra test for Allen Key Probe
   #endif
-  #ifndef Z_CLEARANCE_BETWEEN_PROBES
-    #define Z_CLEARANCE_BETWEEN_PROBES 5
-  #endif
-  #ifndef Z_CLEARANCE_MULTI_PROBE
-    #define Z_CLEARANCE_MULTI_PROBE 5
-  #endif
-  #ifndef Z_PROBE_ERROR_TOLERANCE
-    #define Z_PROBE_ERROR_TOLERANCE Z_CLEARANCE_MULTI_PROBE
+  #ifndef Z_PROBE_LOW_POINT
+    #define Z_PROBE_LOW_POINT -5
   #endif
   #if MULTIPLE_PROBING > 1
     #if EXTRA_PROBING > 0
