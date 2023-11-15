@@ -785,23 +785,25 @@ void RTS::handleData() {
       }
       break;
 
-    case Zoffset:
-      float tmp_zprobe_offset;
-      if (recdat.data[0] >= 32768)
-        tmp_zprobe_offset = (float(recdat.data[0]) - 65536) / 100;
-      else
-        tmp_zprobe_offset = float(recdat.data[0]) / 100;
-      if (WITHIN((tmp_zprobe_offset), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX)) {
-        int16_t tmpSteps = mmToWholeSteps(getZOffset_mm() - tmp_zprobe_offset, axis_t(Z));
-        if (tmpSteps == 0) tmpSteps = getZOffset_mm() < tmp_zprobe_offset ? 1 : -1;
-        smartAdjustAxis_steps(-tmpSteps, axis_t(Z), false);
-        char zOffs[20], tmp1[11];
-        sprintf_P(zOffs, PSTR("Z Offset : %s"), dtostrf(getZOffset_mm(), 1, 3, tmp1));
-        onStatusChanged(zOffs);
-      }
-      else {
-        onStatusChanged(F("Requested Offset Beyond Limits"));
-      }
+    #if HAS_BED_PROBE
+
+      case Zoffset:
+        float tmp_zprobe_offset;
+        if (recdat.data[0] >= 32768)
+          tmp_zprobe_offset = (float(recdat.data[0]) - 65536) / 100;
+        else
+          tmp_zprobe_offset = float(recdat.data[0]) / 100;
+        if (WITHIN((tmp_zprobe_offset), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX)) {
+          int16_t tmpSteps = mmToWholeSteps(getZOffset_mm() - tmp_zprobe_offset, axis_t(Z));
+          if (tmpSteps == 0) tmpSteps = getZOffset_mm() < tmp_zprobe_offset ? 1 : -1;
+          smartAdjustAxis_steps(-tmpSteps, axis_t(Z), false);
+          char zOffs[20], tmp1[11];
+          sprintf_P(zOffs, PSTR("Z Offset : %s"), dtostrf(getZOffset_mm(), 1, 3, tmp1));
+          onStatusChanged(zOffs);
+        }
+        else {
+          onStatusChanged(F("Requested Offset Beyond Limits"));
+        }
 
       sendData(getZOffset_mm() * 100, ProbeOffset_Z);
       break;
@@ -1106,29 +1108,31 @@ void RTS::handleData() {
           sendData(getZOffset_mm() * 100, ProbeOffset_Z);
           break;
         }
-        case 2: { // Z-axis to Up
-          if (WITHIN((getZOffset_mm() + 0.1), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX)) {
-            smartAdjustAxis_steps(getAxisSteps_per_mm(Z) / 10, axis_t(Z), false);
-            //setZOffset_mm(getZOffset_mm() + 0.1);
-            sendData(getZOffset_mm() * 100, ProbeOffset_Z);
-            char zOffs[20], tmp1[11];
-            sprintf_P(zOffs, PSTR("Z Offset : %s"), dtostrf(getZOffset_mm(), 1, 3, tmp1));
-            onStatusChanged(zOffs);
+
+        #if HAS_BED_PROBE
+
+          case 2: { // Z-axis to Up
+            if (WITHIN((getZOffset_mm() + 0.1), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX)) {
+              smartAdjustAxis_steps(getAxisSteps_per_mm(Z) / 10, axis_t(Z), false);
+              //setZOffset_mm(getZOffset_mm() + 0.1);
+              sendData(getZOffset_mm() * 100, ProbeOffset_Z);
+              onStatusChanged(MString<20>(GET_TEXT_F(MSG_UBL_Z_OFFSET), p_float_t(getZOffset_mm(), 3)));
+            }
+            break;
           }
-          break;
-        }
-        case 3: { // Z-axis to Down
-          if (WITHIN((getZOffset_mm() - 0.1), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX)) {
-            smartAdjustAxis_steps(-getAxisSteps_per_mm(Z) / 10, axis_t(Z), false);
-            //babystepAxis_steps(int16_t(-getAxisSteps_per_mm(Z)) / 10, axis_t(Z));
-            //setZOffset_mm(getZOffset_mm() - 0.1);
-            sendData(getZOffset_mm() * 100, ProbeOffset_Z);
-            char zOffs[20], tmp1[11];
-            sprintf_P(zOffs, PSTR("Z Offset : %s"), dtostrf(getZOffset_mm(), 1, 3, tmp1));
-            onStatusChanged(zOffs);
+          case 3: { // Z-axis to Down
+            if (WITHIN((getZOffset_mm() - 0.1), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX)) {
+              smartAdjustAxis_steps(-getAxisSteps_per_mm(Z) / 10, axis_t(Z), false);
+              //babystepAxis_steps(int16_t(-getAxisSteps_per_mm(Z)) / 10, axis_t(Z));
+              //setZOffset_mm(getZOffset_mm() - 0.1);
+              sendData(getZOffset_mm() * 100, ProbeOffset_Z);
+              onStatusChanged(MString<20>(GET_TEXT_F(MSG_UBL_Z_OFFSET), p_float_t(getZOffset_mm(), 3)));
+            }
+            break;
           }
-          break;
-        }
+
+        #endif // HAS_BED_PROBE
+
         case 4: { // Assistant Level
           TERN_(HAS_MESH, setLevelingActive(false));
           injectCommands(isPositionKnown() ? F("G1 F1000 Z0.0") : F("G28\nG1 F1000 Z0.0"));
