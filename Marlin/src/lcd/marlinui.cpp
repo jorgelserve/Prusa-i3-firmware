@@ -408,7 +408,7 @@ void MarlinUI::init() {
 
     #if HAS_TOUCH_BUTTONS
       uint8_t MarlinUI::touch_buttons;
-      uint16_t MarlinUI::repeat_delay;
+      uint8_t MarlinUI::repeat_delay;
     #endif
 
     #if ANY(AUTO_BED_LEVELING_UBL, G26_MESH_VALIDATION)
@@ -695,7 +695,7 @@ void MarlinUI::init() {
       else if ((old_frm < 100 && new_frm > 100) || (old_frm > 100 && new_frm < 100))
         new_frm = 100;
 
-      LIMIT(new_frm, SPEED_EDIT_MIN, SPEED_EDIT_MAX);
+      LIMIT(new_frm, 10, 999);
 
       if (old_frm != new_frm) {
         feedrate_percentage = new_frm;

@@ -97,6 +97,10 @@
 #define MENU_CHAR_LIMIT  24
 #define STATUS_Y        354
 
+// Print speed limit
+#define MIN_PRINT_SPEED  10
+#define MAX_PRINT_SPEED 999
+
 #define FEEDRATE_E      (60)
 
 // Minimum unit (0.1) : multiple (10)
@@ -1380,19 +1384,7 @@ void hmiMoveDone(const AxisEnum axis) {
       dwinUpdateLCD();
       return;
     }
-
-    #if ENABLED(BABYSTEP_ZPROBE_OFFSET) && defined(PROBE_OFFSET_ZMIN)
-      #define _OFFSET_ZMIN (PROBE_OFFSET_ZMIN)
-    #else
-      #define _OFFSET_ZMIN -20
-    #endif
-    #if ENABLED(BABYSTEP_ZPROBE_OFFSET) && defined(PROBE_OFFSET_ZMAX)
-      #define _OFFSET_ZMAX (PROBE_OFFSET_ZMAX)
-    #else
-      #define _OFFSET_ZMAX 20
-    #endif
-    LIMIT(hmiValues.offset_value, _OFFSET_ZMIN * 100, _OFFSET_ZMAX * 100);
-
+    LIMIT(hmiValues.offset_value, (PROBE_OFFSET_ZMIN) * 100, (PROBE_OFFSET_ZMAX) * 100);
     last_zoffset = dwin_zoffset;
     dwin_zoffset = hmiValues.offset_value / 100.0f;
     #if ANY(BABYSTEP_ZPROBE_OFFSET, JUST_BABYSTEP)
@@ -1555,7 +1547,7 @@ void hmiPrintSpeed() {
     return;
   }
   // printSpeed limit
-  LIMIT(hmiValues.printSpeed, SPEED_EDIT_MIN, SPEED_EDIT_MAX);
+  LIMIT(hmiValues.printSpeed, MIN_PRINT_SPEED, MAX_PRINT_SPEED);
   // printSpeed value
   drawEditInteger3(select_tune.now + MROWS - index_tune, hmiValues.printSpeed, true);
 }
